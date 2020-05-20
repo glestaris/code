@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional, List, Set
-from . import commands, events
+from . import events
 
 
 class Product:
@@ -13,7 +13,7 @@ class Product:
         self.version_number = version_number
         self.events = []  # type: List[events.Event]
 
-    def allocate(self, line: OrderLine) -> str:
+    def allocate(self, line: OrderLine) -> Optional[str]:
         try:
             batch = next(
                 b for b in sorted(self.batches) if b.can_allocate(line)
@@ -31,7 +31,7 @@ class Product:
 
     def change_batch_quantity(self, ref: str, qty: int):
         batch = next(b for b in self.batches if b.reference == ref)
-        batch._purchased_quantity = qty
+        batch.purchased_quantity = qty
         while batch.available_quantity < 0:
             line = batch.deallocate_one()
             self.events.append(
@@ -52,7 +52,7 @@ class Batch:
         self.reference = ref
         self.sku = sku
         self.eta = eta
-        self._purchased_quantity = qty
+        self.purchased_quantity = qty
         self._allocations = set()  # type: Set[OrderLine]
 
     def __repr__(self):
@@ -86,7 +86,7 @@ class Batch:
 
     @property
     def available_quantity(self) -> int:
-        return self._purchased_quantity - self.allocated_quantity
+        return self.purchased_quantity - self.allocated_quantity
 
     def can_allocate(self, line: OrderLine) -> bool:
         return self.sku == line.sku and self.available_quantity >= line.qty
