@@ -1,3 +1,5 @@
 {
-  "python.linting.pylintPath": "pylint"
+  "python.linting.pylintPath": "pylint",
+  "python.envFile": "${workspaceFolder}/.envrc",
+  "python.linting.banditEnabled": false
 }
