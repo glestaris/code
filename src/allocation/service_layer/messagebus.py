@@ -13,7 +13,6 @@ Message = Union[commands.Command, events.Event]
 
 
 class MessageBus:
-
     def __init__(
         self,
         uow: unit_of_work.AbstractUnitOfWork,
@@ -33,26 +32,24 @@ class MessageBus:
             elif isinstance(message, commands.Command):
                 self.handle_command(message)
             else:
-                raise Exception(f'{message} was not an Event or Command')
-
+                raise Exception(f"{message} was not an Event or Command")
 
     def handle_event(self, event: events.Event):
         for handler in self.event_handlers[type(event)]:
             try:
-                logger.debug('handling event %s with handler %s', event, handler)
+                logger.debug("handling event %s with handler %s", event, handler)
                 handler(event)
                 self.queue.extend(self.uow.collect_new_events())
             except Exception:
-                logger.exception('Exception handling event %s', event)
+                logger.exception("Exception handling event %s", event)
                 continue
 
-
     def handle_command(self, command: commands.Command):
-        logger.debug('handling command %s', command)
+        logger.debug("handling command %s", command)
         try:
             handler = self.command_handlers[type(command)]
             handler(command)
             self.queue.extend(self.uow.collect_new_events())
         except Exception:
-            logger.exception('Exception handling command %s', command)
+            logger.exception("Exception handling command %s", command)
             raise

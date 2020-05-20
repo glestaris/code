@@ -4,9 +4,7 @@ from allocation.adapters import orm
 from allocation.domain import model
 
 
-
 class AbstractRepository(abc.ABC):
-
     def __init__(self):
         self.seen = set()  # type: Set[model.Product]
 
@@ -39,10 +37,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
 
-
-
 class SqlAlchemyRepository(AbstractRepository):
-
     def __init__(self, session):
         super().__init__()
         self.session = session
@@ -54,6 +49,9 @@ class SqlAlchemyRepository(AbstractRepository):
         return self.session.query(model.Product).filter_by(sku=sku).first()
 
     def _get_by_batchref(self, batchref):
-        return self.session.query(model.Product).join(model.Batch).filter(
-            orm.batches.c.reference == batchref,
-        ).first()
+        return (
+            self.session.query(model.Product)
+            .join(model.Batch)
+            .filter(orm.batches.c.reference == batchref,)
+            .first()
+        )
